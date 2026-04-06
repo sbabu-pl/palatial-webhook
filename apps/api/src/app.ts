@@ -1,3 +1,11 @@
+declare global {
+  namespace Express {
+    interface Request {
+      rawBody?: string;
+    }
+  }
+}
+
 import express from "express";
 import helmet from "helmet";
 import pinoHttp from "pino-http";
@@ -25,6 +33,7 @@ export function createApp() {
     express.json({
       limit: "1mb",
       verify: (req, _res, buf) => {
+        // This captures the raw body needed for WhatsApp signature verification
         req.rawBody = buf.toString("utf8");
       }
     })
