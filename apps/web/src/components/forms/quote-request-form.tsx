@@ -115,14 +115,13 @@ export function QuoteRequestForm({
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-        <input
-          type="text"
-          name="website"
-          tabIndex={-1}
-          autoComplete="off"
-          className="hidden"
-          aria-hidden="true"
-        />
+<input 
+  type="text" 
+  name="website" 
+  style={{ display: 'none' }} 
+  tabIndex={-1} 
+  autoComplete="off" 
+/>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
