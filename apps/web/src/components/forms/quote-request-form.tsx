@@ -72,6 +72,7 @@ export function QuoteRequestForm({
     }
 
     try {
+  try {
       const response = await fetch("/api/quote-request", {
         method: "POST",
         headers: {
@@ -80,29 +81,25 @@ export function QuoteRequestForm({
         body: JSON.stringify(parsed.data)
       });
 
-      const result = (await response.json()) as {
-        success: boolean;
-        message: string;
-        errors?: FormErrors;
-      };
+      const result = await response.json();
 
-      if (!response.ok || !result.success) {
+      // Fix: Check for 200 or 201 specifically for success
+      if (response.status === 200 || response.status === 201) {
+        event.currentTarget.reset();
+        setStatus("success");
+        setServerMessage(result.message || "Thank you! Your request has been submitted.");
+        setErrors({});
+      } else {
+        // Handle server-side validation or logic errors
         setErrors(result.errors ?? {});
         setStatus("error");
         setServerMessage(result.message || "We could not submit your request.");
-        return;
       }
-
-      event.currentTarget.reset();
-      setStatus("success");
-      setServerMessage(result.message);
-      setErrors({});
-    } catch {
+    } catch (error) {
+      console.error("Submission error:", error);
       setStatus("error");
       setServerMessage("We could not submit your request right now. Please try again.");
     }
-  }
-
   function getFieldError(name: keyof QuoteRequestInput): string | undefined {
     return errors[name]?.[0];
   }
