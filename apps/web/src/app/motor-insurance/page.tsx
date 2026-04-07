@@ -1,4 +1,4 @@
-import { QuoteRequestForm } from "@/components/forms/quote-request-form";
+import { QuoteRequestForm } from "../../components/forms/quote-request-form";
 
 export default function MotorInsurancePage() {
   return (
