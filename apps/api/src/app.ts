@@ -20,6 +20,17 @@ export function createApp() {
   const app = express();
 
   app.disable("x-powered-by");
+  import cors from "cors"; // Add this import at the top
+
+// ... inside createApp()
+const app = express();
+app.disable("x-powered-by");
+
+// ADD THIS LINE HERE:
+app.use(cors()); 
+
+app.use(pinoHttp({ logger }));
+// ... rest of your code
 
   app.use(
     pinoHttp({
