@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-// Use TWO sets of dots, not three
 import { quoteRequestSchema, type QuoteRequestInput } from "../../lib/quote-request.schema";
 
 type ProductType = QuoteRequestInput["productType"];
@@ -46,7 +45,8 @@ export function QuoteRequestForm({
     setServerMessage("");
     setErrors({});
 
-    const formData = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const formData = new FormData(formElement);
 
     const payload: QuoteRequestInput = {
       fullName: String(formData.get("fullName") ?? ""),
@@ -72,7 +72,6 @@ export function QuoteRequestForm({
     }
 
     try {
-  try {
       const response = await fetch("/api/quote-request", {
         method: "POST",
         headers: {
@@ -83,14 +82,12 @@ export function QuoteRequestForm({
 
       const result = await response.json();
 
-      // Fix: Check for 200 or 201 specifically for success
       if (response.status === 200 || response.status === 201) {
-        event.currentTarget.reset();
+        formElement.reset(); // Correct way to reset the form
         setStatus("success");
         setServerMessage(result.message || "Thank you! Your request has been submitted.");
         setErrors({});
       } else {
-        // Handle server-side validation or logic errors
         setErrors(result.errors ?? {});
         setStatus("error");
         setServerMessage(result.message || "We could not submit your request.");
@@ -100,6 +97,8 @@ export function QuoteRequestForm({
       setStatus("error");
       setServerMessage("We could not submit your request right now. Please try again.");
     }
+  }
+
   function getFieldError(name: keyof QuoteRequestInput): string | undefined {
     return errors[name]?.[0];
   }
@@ -112,13 +111,14 @@ export function QuoteRequestForm({
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-<input 
-  type="text" 
-  name="website" 
-  style={{ display: 'none' }} 
-  tabIndex={-1} 
-  autoComplete="off" 
-/>
+        {/* Honeypot Field */}
+        <input 
+          type="text" 
+          name="website" 
+          style={{ display: 'none' }} 
+          tabIndex={-1} 
+          autoComplete="off" 
+        />
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
@@ -129,16 +129,11 @@ export function QuoteRequestForm({
               id="fullName"
               name="fullName"
               type="text"
-              autoComplete="name"
               className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
               placeholder="Your full name"
-              aria-invalid={Boolean(getFieldError("fullName"))}
-              aria-describedby={getFieldError("fullName") ? "fullName-error" : undefined}
             />
             {getFieldError("fullName") && (
-              <p id="fullName-error" className="mt-1 text-sm text-red-600">
-                {getFieldError("fullName")}
-              </p>
+              <p className="mt-1 text-sm text-red-600">{getFieldError("fullName")}</p>
             )}
           </div>
 
@@ -150,16 +145,11 @@ export function QuoteRequestForm({
               id="phone"
               name="phone"
               type="tel"
-              autoComplete="tel"
               className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
               placeholder="0712 345 678"
-              aria-invalid={Boolean(getFieldError("phone"))}
-              aria-describedby={getFieldError("phone") ? "phone-error" : undefined}
             />
             {getFieldError("phone") && (
-              <p id="phone-error" className="mt-1 text-sm text-red-600">
-                {getFieldError("phone")}
-              </p>
+              <p className="mt-1 text-sm text-red-600">{getFieldError("phone")}</p>
             )}
           </div>
 
@@ -171,16 +161,11 @@ export function QuoteRequestForm({
               id="email"
               name="email"
               type="email"
-              autoComplete="email"
               className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
               placeholder="you@example.com"
-              aria-invalid={Boolean(getFieldError("email"))}
-              aria-describedby={getFieldError("email") ? "email-error" : undefined}
             />
             {getFieldError("email") && (
-              <p id="email-error" className="mt-1 text-sm text-red-600">
-                {getFieldError("email")}
-              </p>
+              <p className="mt-1 text-sm text-red-600">{getFieldError("email")}</p>
             )}
           </div>
 
@@ -194,25 +179,14 @@ export function QuoteRequestForm({
               rows={4}
               className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
               placeholder="Example: Comprehensive cover for a Toyota Axio, 2018 model."
-              aria-invalid={Boolean(getFieldError("message"))}
-              aria-describedby={getFieldError("message") ? "message-error" : undefined}
             />
-            {getFieldError("message") && (
-              <p id="message-error" className="mt-1 text-sm text-red-600">
-                {getFieldError("message")}
-              </p>
-            )}
           </div>
         </div>
 
         {serverMessage && (
-          <div
-            className={`rounded-xl px-4 py-3 text-sm ${
-              status === "success"
-                ? "bg-green-50 text-green-800"
-                : "bg-red-50 text-red-700"
-            }`}
-          >
+          <div className={`rounded-xl px-4 py-3 text-sm ${
+            status === "success" ? "bg-green-50 text-green-800" : "bg-red-50 text-red-700"
+          }`}>
             {serverMessage}
           </div>
         )}
