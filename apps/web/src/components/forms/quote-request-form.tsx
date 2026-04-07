@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { quoteRequestSchema, type QuoteRequestInput } from "../../../lib/quote-request.schema";
+// Use TWO sets of dots, not three
+import { quoteRequestSchema, type QuoteRequestInput } from "../../lib/quote-request.schema";
 
 type ProductType = QuoteRequestInput["productType"];
 
