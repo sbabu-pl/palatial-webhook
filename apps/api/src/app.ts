@@ -7,6 +7,7 @@ declare global {
 }
 
 import express from "express";
+import cors from "cors"; // 1. Import at the top
 import helmet from "helmet";
 import pinoHttp from "pino-http";
 import { logger } from "./lib/logger";
@@ -20,26 +21,9 @@ export function createApp() {
   const app = express();
 
   app.disable("x-powered-by");
-  import cors from "cors"; // Add this import at the top
 
-// ... inside createApp()
-const app = express();
-app.disable("x-powered-by");
-
-// ADD THIS LINE HERE:
-// 1. Ensure the import is at the very top of the file
-import cors from "cors"; 
-
-// ... later inside the createApp function
-const app = express();
-
-// 2. It must be app.use() with parentheses
-app.use(cors()); 
-
-// ... the rest of your app.use calls 
-
-app.use(pinoHttp({ logger }));
-// ... rest of your code
+  // 2. Enable CORS so your website can talk to this API
+  app.use(cors());
 
   app.use(
     pinoHttp({
@@ -69,6 +53,7 @@ app.use(pinoHttp({ logger }));
 
   app.use("/webhooks/whatsapp", whatsappRouter);
 
+  // Security: requireApiKey ensures only your website can post here
   app.use("/api/leads", requireApiKey, leadsRouter);
   app.use("/api/agents", requireApiKey, agentsRouter);
 
