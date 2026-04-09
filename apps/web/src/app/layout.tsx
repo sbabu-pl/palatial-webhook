@@ -1,16 +1,11 @@
-export const metadata = {
-  title: 'Palatial Insurance',
-  description: 'Fast, reliable insurance quotes in Kenya',
-}
+import "./(public)/css/style.css"; 
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="bg-[#0f172a] text-white"> 
+  {children}
+</body>
     </html>
-  )
+  );
 }
