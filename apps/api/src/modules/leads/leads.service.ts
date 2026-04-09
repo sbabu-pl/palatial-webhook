@@ -29,6 +29,33 @@ function appendTimestampedNote(existing: string | null | undefined, next: string
 }
 
 export class LeadService {
+  /**
+   * MIRROR TO PHP: Sends lead data to your Kenyan MySQL database
+   */
+  private async forwardToPHP(lead: { fullName: string | null; phoneE164: string; productType?: string | null; notes?: string | null }) {
+    try {
+      const phpUrl = "https://palatial.co.ke/whatsapp-webhook.php";
+      
+      // Using global fetch (Standard in Node 18+)
+      await fetch(phpUrl, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.INTERNAL_API_KEY || '' 
+        },
+        body: JSON.stringify({
+          fullName: lead.fullName || 'Unknown',
+          phone: lead.phoneE164,
+          productType: lead.productType || 'General',
+          message: lead.notes || ''
+        })
+      });
+      console.log(`[Mirror] Success: Lead ${lead.phoneE164} sent to PHP server.`);
+    } catch (error) {
+      console.error("[Mirror] Failed to forward to PHP:", error);
+    }
+  }
+
   public async createOrUpdateWebsiteLead(input: CreateLeadInput) {
     return prisma.$transaction(async (tx) => {
       const phoneE164 = normalizeKenyanPhoneToE164(input.phone);
@@ -77,6 +104,9 @@ export class LeadService {
           }
         });
 
+        // Sync Update to PHP
+        this.forwardToPHP(updated);
+
         return this.getLeadByIdOrThrow(updated.id, tx);
       }
 
@@ -110,6 +140,9 @@ export class LeadService {
         }
       });
 
+      // Sync New Lead to PHP
+      this.forwardToPHP(created);
+
       return this.getLeadByIdOrThrow(created.id, tx);
     });
   }
@@ -138,6 +171,9 @@ export class LeadService {
           }
         });
 
+        // Sync WhatsApp Update to PHP
+        this.forwardToPHP(updated);
+
         return this.getLeadByIdOrThrow(updated.id, tx);
       }
 
@@ -159,6 +195,9 @@ export class LeadService {
           message: "Lead created from WhatsApp"
         }
       });
+
+      // Sync New WhatsApp Lead to PHP
+      this.forwardToPHP(created);
 
       return this.getLeadByIdOrThrow(created.id, tx);
     });
@@ -191,7 +230,7 @@ export class LeadService {
       }
 
       if (Object.keys(data).length > 0) {
-        await tx.lead.update({
+        const updated = await tx.lead.update({
           where: { id: leadId },
           data
         });
@@ -205,6 +244,9 @@ export class LeadService {
             metadata: safeJson(leadUpdate)
           }
         });
+
+        // Sync Chatbot Logic (Insurance Type / Notes) to PHP
+        this.forwardToPHP(updated);
       }
     });
   }
@@ -335,6 +377,9 @@ export class LeadService {
           metadata: safeJson(input)
         }
       });
+
+      // Sync Manual API Updates to PHP
+      this.forwardToPHP(updated);
 
       return this.getLeadByIdOrThrow(updated.id, tx);
     });
