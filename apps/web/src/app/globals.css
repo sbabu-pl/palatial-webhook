@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand Colors */
+  --color-primary: #0A2540;
+  --color-palace-gold: #D4AF37;
+  --color-growth-emerald: #10B981;
+  --color-charcoal: #1E293B;
+  
+  /* You can also set these as the default text/background colors */
+  --color-gray-900: #1E293B; 
+}
+
+body {
+  color: var(--color-charcoal);
+  background-color: #FFFFFF;
+}
